@@ -70,9 +70,20 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-react@16.0.0-alpha.2:
-  version "16.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.0.0-alpha.2.tgz#9c81ac487d2795e1fba1bcc3bdff702c6267b42f"
+react-dom@16.0.0-alpha.3:
+  version "16.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.0.0-alpha.3.tgz#9cf304ea4bcdafe026f29ec2e71373316ec597ab"
+  dependencies:
+    fbjs "^0.8.9"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.0"
+
+"react-fiber-types@file:../fiber-types":
+  version "16.0.0-alpha.3"
+
+react@16.0.0-alpha.3:
+  version "16.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.0.0-alpha.3.tgz#addfd7ae9d801fd20c6244142354ae0cb7b1fe00"
   dependencies:
     fbjs "^0.8.9"
     loose-envify "^1.1.0"

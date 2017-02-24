@@ -28,7 +28,9 @@
   "homepage": "https://github.com/iamdustan/tiny-render-renderer",
   "dependencies": {
     "fbjs": "^0.8.4",
-    "react": "16.0.0-alpha.2"
+    "react": "16.0.0-alpha.3",
+    "react-dom": "16.0.0-alpha.3",
+    "react-fiber-types": "file:../fiber-types"
   },
   "devDependencies": {}
 }
