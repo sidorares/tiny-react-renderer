@@ -51,6 +51,20 @@ const ReactFiberReconciler : (
  */
 const TinyRenderer = ReactFiberReconciler({
 
+
+  // the prepareForCommit and resetAfterCommit methods are necessary for any
+  // global side-effects you need to trigger in the host environment. In
+  // ReactDOM this does things like disable the ReactDOM events to ensure no
+  // callbacks are fired during DOM manipulations
+
+  prepareForCommit() : void {
+    // noop
+  },
+
+  resetAfterCommit() : void {
+    // noop
+  },
+
   // the following four methods are regarding TextInstances. In our example
   // renderer we don’t have specific text nodes like the DOM does so we’ll just
   // noop all of them.
