@@ -4,13 +4,12 @@
  * The Reconciler API for the current targeted revision is available at:
  * https://github.com/facebook/react/blob/ca4325e3eff16b86879188eb996ebcc9a933336a/src/renderers/shared/fiber/ReactFiberReconciler.js#L48-L104
  *
- * A renderer is created by passing an object that conforms to this shape into
- * require('ReactFiberReconciler')(hostConfig: HostConfig) and receives back a
- * Reconciler. You then create your *renderer* API through calling methods of
- * the reconciler.
+ * A renderer is the public interface to a React reconciler. With Fiber you
+ * create a reconciler by calling `ReactFiberReconciler` with a `HostConfig`
+ * object.
  *
- * These types are copied into `../react-types` for the current revision
- * (16.0.0-alpha.3).
+ * All types for creating a react reconciler are manually extracted into
+ * `../react-types` for the current revision (16.0.0-alpha.3).
  *
  * @flow
  */
@@ -26,8 +25,14 @@ import type { ReactNodeList } from 'react-fiber-types/ReactTypes';
 
 // our renconciler types are defined in ./ReactTinyTypes.js for a convenient place to see
 // what types you’re expected to define when implementing a renderer
-import type { Props } from './ReactTinyTypes';
-
+import type {
+  Props,
+  Container,
+  Instance,
+  TextInstance,
+  OpaqueHandle,
+  HostContext,
+} from './ReactTinyTypes';
 
 /**
  * This is the only entry point you need to create a Fiber renderer. Note that
@@ -45,8 +50,36 @@ const ReactFiberReconciler : (
  * components, such as composites, stateless, and fragments.
  */
 const TinyRenderer = ReactFiberReconciler({
-  shouldSetTextContent(props : Props) : boolean {
+
+  // the following four methods are regarding TextInstances. In our example
+  // renderer we don’t have specific text nodes like the DOM does so we’ll just
+  // noop all of them.
+
+
+  shouldSetTextContent(props : Props): boolean {
     return false
+  },
+
+  resetTextContent(instance : Instance) : void {
+    // noop
+  },
+
+  createTextInstance(
+    text : string,
+    rootContainerInstance : Container,
+    hostContext : HostContext,
+    internalInstanceHandle : OpaqueHandle
+  ) : TextInstance {
+    return null;
+  },
+
+  commitTextUpdate(
+    textInstance : TextInstance,
+    oldText : string,
+    newText : string
+  ) : void {
+    // noop
+    throw new Error('commitTextUpdate should not be called');
   }
 });
 
