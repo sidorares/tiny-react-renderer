@@ -4,7 +4,7 @@
   "description": "A tiny React fiber renderer to demonstrate how to write a renderer.",
   "main": "./index.js",
   "scripts": {
-    "test": "node ./test"
+    "test": "pushd ../../; npm run test-fiber"
   },
   "repository": {
     "type": "git",

@@ -4,9 +4,10 @@
   "description": "A tiny React renderer to demonstrate how to write a renderer.",
   "main": "./index.js",
   "scripts": {
+    "flow": "pushd src/fiber; flow; popd;",
     "test-stack": "node ./test --stack",
     "test-fiber": "node ./test --fiber",
-    "test": "node ./test && node ./test --fiber"
+    "test": "node ./test && node ./test --fiber && npm run flow"
   },
   "repository": {
     "type": "git",

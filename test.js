@@ -10,6 +10,7 @@ const TEST_FILE = args[0] === '-f' || args[0] === '--fiber'
   ? 'fiber'
   : 'stack';
 
+console.log('Running %s tests', TEST_FILE);
 const TinyRenderer = require('./src/' + TEST_FILE);
 const render = TinyRenderer.render;
 const toJSON = (props) => {
@@ -40,12 +41,21 @@ const Rte = (path, component, children) =>
 const ok = [];
 const fail = [];
 const skipped = [];
+const colors = {
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  reset: '\x1b[37m',
+};
+
 const it = (desc, fn) => {
   try {
     fn.call(null);
+    console.log('%s✓ %s%s', colors.green, colors.reset, desc);
     ok.push({desc});
   } catch (err) {
     fail.push({desc, err});
+    console.log('%s𝘅 %s%s',colors.red, colors.reset,  desc);
+    console.error('%s. Expected\n  %j\n to equal\n  %j\n', err.name, err.actual, err.expected)
   }
 };
 
@@ -95,10 +105,6 @@ it('should render with a custom toJSON method', () => {
 });
 
 if (fail.length > 0) {
-  fail.map(f => {
-    console.log(f.desc);
-    console.error('%s. Expected\n  %j\n to equal\n  %j\n', f.err.name, f.err.actual, f.err.expected)
-  });
   console.log('%s tests passed', ok.length);
   if (skipped.length) console.log('%s tests skipped', skipped.length);
   console.log('%s tests failed', fail.length);
@@ -108,3 +114,4 @@ if (fail.length > 0) {
   if (skipped.length) console.log('%s tests skipped', skipped.length);
 }
 
+console.log('');
