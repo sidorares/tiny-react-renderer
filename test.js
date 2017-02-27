@@ -1,5 +1,7 @@
 'use strict';
 
+require('babel-register')({});
+
 const assert = require('assert');
 const React = require('react');
 const args = process.argv.slice(2);
