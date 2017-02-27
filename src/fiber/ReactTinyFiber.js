@@ -64,6 +64,13 @@ const TinyRenderer = ReactFiberReconciler({
     return emptyObject;
   },
 
+  // getPublicInstance should be the identity function in 99% of all scenarios.
+  // It was added to support the `getNodeMock` functionality for the
+  // TestRenderers.
+  //
+  getPublicInstance(instance : Instance | TextInstance) {
+    return instance;
+  },
 
   // the prepareForCommit and resetAfterCommit methods are necessary for any
   // global side-effects you need to trigger in the host environment. In
@@ -107,7 +114,7 @@ const TinyRenderer = ReactFiberReconciler({
   ) : void {
     // noop
     throw new Error('commitTextUpdate should not be called');
-  }
+  },
 });
 
 /**
