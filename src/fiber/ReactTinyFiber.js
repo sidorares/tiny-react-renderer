@@ -6,9 +6,11 @@
  *
  * A renderer is created by passing an object that conforms to this shape into
  * require('ReactFiberReconciler')(hostConfig: HostConfig) and receives back a
- * Renderer.
+ * Reconciler. You then create your *renderer* API through calling methods of
+ * the reconciler.
  *
- * These types are copied into `./ReactTinyFiberTypes.js` at the current revision.
+ * These types are copied into `../react-types` for the current revision
+ * (16.0.0-alpha.3).
  *
  * @flow
  */
@@ -22,12 +24,18 @@
 import type { HostConfig, Reconciler } from 'react-fiber-types';
 import type { ReactNodeList } from 'react-fiber-types/ReactTypes';
 
+// our renconciler types are defined in ./ReactTinyTypes.js for a convenient place to see
+// what types you’re expected to define when implementing a renderer
+import type { Props } from './ReactTinyTypes';
+
 
 /**
  * This is the only entry point you need to create a Fiber renderer. Note that
  * it currently lives within the `react-dom` package and not `react.
  */
-const ReactFiberReconciler : (hostConfig: HostConfig<*, *, *, *, *, *, *, *>) => Reconciler<*, *, *> = require('react-dom/lib/ReactFiberReconciler');
+const ReactFiberReconciler : (
+  hostConfig: HostConfig<*, *, *, *, *, *, *, *>
+) => Reconciler<*, *, *> = require('react-dom/lib/ReactFiberReconciler');
 
 /**
  * The fun begins!
@@ -37,6 +45,9 @@ const ReactFiberReconciler : (hostConfig: HostConfig<*, *, *, *, *, *, *, *>) =>
  * components, such as composites, stateless, and fragments.
  */
 const TinyRenderer = ReactFiberReconciler({
+  shouldSetTextContent(props : Props) : boolean {
+    return false
+  }
 });
 
 /**

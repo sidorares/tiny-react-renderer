@@ -19,8 +19,10 @@ scheduled. The type of effects are:
 * `Err`
 * `Ref`
 
-This is likely best explained with an example. We’ll create a component that
-first renders the text `"Hello"` followed by rendering the text `"World"`.
+This is likely best explained with an example using the DOM renderer. We’ll
+create a Composite Component that renders a text instance with the `"Hello"`
+inside of a `div` host instance. We’ll immediately render the `App` composite
+component updating the text instance contents to be the string `"World"`.
 
 ```jsx
 const App = (props) => <div>{props.children}</div>;
@@ -29,16 +31,18 @@ ReactDOM.render(<App>Hello</App>, document.body);
 ReactDOM.render(<App>Goodbye</App>, document.body);
 ```
 
-In your reconciler config you will have a few methods specifically regarding
-text updates.
+In the initial rendering Fiber will schedule `PlacementAndUpdate` effects to
+create the simple `<div /> -> [text#Hello]` tree. When reconciling the second
+render call, when beginning work Fiber will schedule a `ContentReset` effect to
+clear the text of the `div` and an `Update` effect to schedule setting the new
+text content.
 
-* `shouldSetTextContent`
-* `createTextInstance`
-* `resetTextContent`
-* `commitTextUpdate`
+A renderer informs a fiber reconciler what text effects to schedule and how to
+complete them through the following handful of methods:
 
-`shouldSetTextContent` method returns a boolean to inform the reconciler to
-schedule a `ContentReset` effect which results in the reconcilers
-`resetTextContent` and `commitTextUpdate` methods being called at the
-appropriate times.
+* `shouldSetTextContent`: communicates to the reconciler if a `ContentReset`
+  effect should be scheduled
+* `resetTextContent`: Fiber calls this method when commiting the `ContentReset` effect
+* `createTextInstance`: Fiber calls this method when it needs a new host text instance
+* `commitTextUpdate`: Fiber calls this method to commit the new text content `Update` effect
 
