@@ -51,6 +51,19 @@ const ReactFiberReconciler : (
  */
 const TinyRenderer = ReactFiberReconciler({
 
+  // HostContext is an internal object or reference for any bookkeeping your
+  // renderer may need to do based on current location in the tree. In DOM this
+  // is necessary for calling the correct `document.createElement` calls based
+  // upon being in an `html`, `svg`, `mathml`, or other context of the tree.
+
+  getRootHostContext(rootContainerInstance : Container) : HostContext {
+    return emptyObject;
+  },
+
+  getChildHostContext(parentHostContext : HostContext, type: string) : HostContext {
+    return emptyObject;
+  },
+
 
   // the prepareForCommit and resetAfterCommit methods are necessary for any
   // global side-effects you need to trigger in the host environment. In
@@ -128,6 +141,7 @@ const Tiny = {
 };
 
 const roots = new Map();
+const emptyObject = {};
 
 module.exports = Tiny;
 
