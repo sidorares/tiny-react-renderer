@@ -42,6 +42,35 @@ const ReactFiberReconciler : (
   hostConfig: HostConfig<*, *, *, *, *, *, *, *>
 ) => Reconciler<*, *, *> = require('react-dom/lib/ReactFiberReconciler');
 
+const LOG_STEPS = false;
+const log = (a, b, c) => {
+  if (LOG_STEPS) {
+    console.log(a, b, c);
+  }
+};
+
+const toJSON = (node) => {
+  const props = node.props;
+  if (typeof props.toJSON === 'function') {
+    return props.toJSON(props);
+  }
+
+  let children = null;
+  if (props.children) {
+    if (Array.isArray(props.children)) {
+      children = props.children.map(toJSON);
+    } else if (props.children) {
+      children = toJSON(props.children);
+    }
+    return Object.assign({}, props, {children});
+  } else {
+    const clone = Object.assign({}, props);
+    delete clone.children;
+    return clone;
+  }
+};
+
+
 /**
  * The fun begins!
  *
@@ -51,25 +80,148 @@ const ReactFiberReconciler : (
  */
 const TinyRenderer = ReactFiberReconciler({
 
+  // the tree creation and updating methods. If you’re familiar with the DOM API
+  // this will look familiar
+
+  createInstance(
+    type : string,
+    props : Props,
+    rootContainerInstance : Container,
+    hostContext : HostContext,
+    internalInstanceHandle : Object
+  ) {
+    if (props.toJSON) {
+      return props.toJSON(props);
+    } else {
+      return toJSON({props});
+    }
+  },
+
+  // this is called instead of `appendChild` when the parentInstance is first
+  // being created and mounted
+  // added in https://github.com/facebook/react/pull/8400/
+  appendInitialChild(
+    parentInstance : Instance,
+    child : Instance | TextInstance
+  ) : void {
+    //
+    log('appendInitialChild', child);
+  },
+
+
+  appendChild(
+    parentInstance : Instance | Container,
+    child : Instance | TextInstance
+  ) : void {
+    log('appendChild', child);
+    // const index = parentInstance.children.indexOf(child);
+    // if (index !== -1) {
+    //   parentInstance.children.splice(index, 1);
+    // }
+    // parentInstance.children.push(child);
+  },
+
+  removeChild(
+    parentInstance : Instance | Container,
+    child : Instance | TextInstance
+  ) : void {
+    log('removeChild', child);
+    // parentInstance.removeChild(child);
+  },
+
+  insertBefore(
+    parentInstance : Instance | Container,
+    child : Instance | TextInstance,
+    beforeChild : Instance | TextInstance
+  ) : void {
+    log('insertBefore');
+    // parentInstance.insertBefore(child, beforeChild);
+  },
+
+  // finalizeInitialChildren is the final HostConfig method called before
+  // flushing the root component to the host environment
+
+  finalizeInitialChildren(
+    instance : Instance,
+    type : string,
+    props : Props,
+    rootContainerInstance : Container
+  ) : boolean {
+    log('finalizeInitialChildren');
+    // setInitialProperties(instance, type, props, rootContainerInstance);
+    return false;
+  },
+
+  // prepare update is where you compute the diff for an instance. This is done
+  // here to separate computation of the diff to the applying of the diff. Fiber
+  // can reuse this work even if it pauses or aborts rendering a subset of the
+  // tree.
+
+  prepareUpdate(
+    instance : Instance,
+    type : string,
+    oldProps : Props,
+    newProps : Props,
+    rootContainerInstance : Container,
+    hostContext : HostContext
+  ) : null | Array<mixed> {
+    log('TODO: prepareUpdate');
+    return null;
+    // return diffProperties(instance, type, oldProps, newProps, rootContainerInstance, hostContext);
+  },
+
+  commitUpdate(
+    instance : Instance,
+    updatePayload : Array<mixed>,
+    type : string,
+    oldProps : Props,
+    newProps : Props,
+    internalInstanceHandle : Object,
+  ) : void {
+    // Apply the diff to the DOM node.
+    // updateProperties(instance, updatePayload, type, oldProps, newProps);
+    log('TODO: updateProperties');
+  },
+
+  // commitMount is called after initializeFinalChildren *if*
+  // `initializeFinalChildren` returns true.
+
+  commitMount(
+    instance : Instance,
+    type : string,
+    newProps : Props,
+    internalInstanceHandle : Object
+  ) {
+    log('commitMount');
+    // noop
+  },
+
   // HostContext is an internal object or reference for any bookkeeping your
   // renderer may need to do based on current location in the tree. In DOM this
   // is necessary for calling the correct `document.createElement` calls based
   // upon being in an `html`, `svg`, `mathml`, or other context of the tree.
 
   getRootHostContext(rootContainerInstance : Container) : HostContext {
+    log('getRootHostContext');
     return emptyObject;
   },
 
   getChildHostContext(parentHostContext : HostContext, type: string) : HostContext {
+    log('getChildHostContext');
     return emptyObject;
   },
 
   // getPublicInstance should be the identity function in 99% of all scenarios.
   // It was added to support the `getNodeMock` functionality for the
   // TestRenderers.
-  //
+
   getPublicInstance(instance : Instance | TextInstance) {
-    return instance;
+    log('getPublicInstance');
+    if (instance == null) {
+      return null;
+    }
+    console.log(instance)
+    return instance != null && instance.props.toJSON(instance);
   },
 
   // the prepareForCommit and resetAfterCommit methods are necessary for any
@@ -78,10 +230,12 @@ const TinyRenderer = ReactFiberReconciler({
   // callbacks are fired during DOM manipulations
 
   prepareForCommit() : void {
+    log('prepareForCommit');
     // noop
   },
 
   resetAfterCommit() : void {
+    log('resetAfterCommit');
     // noop
   },
 
@@ -89,12 +243,13 @@ const TinyRenderer = ReactFiberReconciler({
   // renderer we don’t have specific text nodes like the DOM does so we’ll just
   // noop all of them.
 
-
   shouldSetTextContent(props : Props): boolean {
+    log('shouldSetTextContent');
     return false
   },
 
   resetTextContent(instance : Instance) : void {
+    log('resetTextContent');
     // noop
   },
 
@@ -104,6 +259,7 @@ const TinyRenderer = ReactFiberReconciler({
     hostContext : HostContext,
     internalInstanceHandle : OpaqueHandle
   ) : TextInstance {
+    log('createTextInstance');
     return null;
   },
 
@@ -112,9 +268,20 @@ const TinyRenderer = ReactFiberReconciler({
     oldText : string,
     newText : string
   ) : void {
+    log('commitTextUpdate');
     // noop
     throw new Error('commitTextUpdate should not be called');
   },
+
+  scheduleAnimationCallback() {
+    log('scheduleAnimationCallback');
+  },
+
+  scheduleDeferredCallback() {
+    log('scheduleDeferredCallback');
+  },
+
+  useSyncScheduling: true,
 });
 
 /**
@@ -122,22 +289,26 @@ const TinyRenderer = ReactFiberReconciler({
  * should have access to. `render` and `unmountComponentAtNode` methods should
  * be considered required, though that isn’t strictly true.
  */
+const defaultContainer = {};
 const Tiny = {
   render(
     element : React$Element<any>,
+    callback : ?Function,
     container : any,
-    callback : ?Function
   ) {
-    let root = roots.get(container);
+    const containerKey = typeof container === 'undefined' ? defaultContainer : container;
+    let root = roots.get(containerKey);
     if (!root) {
-      root = TinyRenderer.createContainer(container);
+      root = TinyRenderer.createContainer(containerKey);
       roots.set(container, root);
     }
 
     TinyRenderer.updateContainer((element : any), root, null, callback);
+    return TinyRenderer.getPublicRootInstance(root);
   },
   unmountComponentAtNode(container : any) {
-    const root = roots.get(container);
+    const containerKey = typeof container === 'undefined' ? defaultContainer : container;
+    const root = roots.get(containerKey);
     if (root) {
       TinyRenderer.updateContainer(null, root, null, () => {
         roots.delete(container);
