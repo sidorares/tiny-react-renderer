@@ -15,15 +15,20 @@ const TinyRenderer = require('./src/' + TEST_FILE);
 const render = TinyRenderer.render;
 const toJSON = (props) => {
   if (props.children) {
-    let children;
+    let childRoutes;
     if (Array.isArray(props.children)) {
-      children = props.children.map(_ => ({}));
+      childRoutes = props.children.map(child => (
+        typeof child.props.toJSON === 'function'
+        ? child.props.toJSON(child.props)
+        : toJSON(child.props)
+      ));
     } else {
-      children = {};
+      childRoutes = {};
     }
-    return {children};
+    return {path: props.path, childRoutes};
   }
-  return {};
+
+  return {path: props.path};
 };
 
 // mock stateless components
@@ -33,10 +38,10 @@ const Page2 = () => React.createElement('div');
 
 // helper for <Route path={path} component={component}>{children}</Route>
 const Route = (path, component, children) =>
-  React.createElement('route', {path: path, component: component, key: path}, children);
+  React.createElement('Route', {path: path, component: component, key: path}, children);
 
 const Rte = (path, component, children) =>
-  React.createElement('route', {path: path, component: component, key: path, toJSON: toJSON}, children);
+  React.createElement('Route', {path: path, component: component, key: path, toJSON: toJSON}, children);
 
 const ok = [];
 const fail = [];
@@ -62,44 +67,48 @@ const it = (desc, fn) => {
 it.skip = (desc, fn) => skipped.push({desc});
 
 it('should render with the default toJSON behavior', () => {
-  render(
+  const element = render(
     Route('/', Base, [
       Route('/page/1', Page1),
       Route('/page/2', Page2)
-    ]),
-    (element) => {
-      assert.deepEqual(
-        element,
+    ])
+  );
+
+  assert.deepEqual(
+    element,
+    {
+      path: '/',
+      component: Base,
+      children: [
         {
-          path: '/',
-          component: Base,
-          children: [
-            {
-              path: '/page/1',
-              component: Page1
-            },
-            {
-              path: '/page/2',
-              component: Page2
-            }
-          ]
+          path: '/page/1',
+          component: Page1
+        },
+        {
+          path: '/page/2',
+          component: Page2
         }
-      );
+      ]
     }
   );
 });
 
 it('should render with a custom toJSON method', () => {
-  render(
+  const element = render(
     Rte('/', Base, [
-      Rte('/page/1', Page1),
+      Rte('/page/1', Page1, [Rte('lol')]),
       Rte('/page/2', Page2)
-    ]),
-    (element) => {
-      assert.deepEqual(
-        element,
-        {children: [{}, {}]}
-      );
+    ])
+  );
+
+  assert.deepEqual(
+    element,
+    {
+      path: '/',
+      childRoutes: [
+        {path: '/page/1', childRoutes: [{path: 'lol'}]},
+        {path: '/page/2'}
+      ]
     }
   );
 });
