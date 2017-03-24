@@ -50,6 +50,9 @@ const log = (a, b, c) => {
 };
 
 const toJSON = (node) => {
+  if (typeof node === 'string') {
+    return node
+  }
   const props = node.props;
   if (typeof props.toJSON === 'function') {
     return props.toJSON(props);
@@ -60,6 +63,7 @@ const toJSON = (node) => {
     if (Array.isArray(props.children)) {
       children = props.children.map(toJSON);
     } else if (props.children) {
+      debugger
       children = toJSON(props.children);
     }
     return Object.assign({}, props, {children});
@@ -268,7 +272,7 @@ const TinyRenderer = ReactFiberReconciler({
     oldText : string,
     newText : string
   ) : void {
-    log('commitTextUpdate');
+    console.log('commitTextUpdate', oldText, newText);
     // noop
     throw new Error('commitTextUpdate should not be called');
   },
@@ -323,3 +327,11 @@ const emptyObject = {};
 
 module.exports = Tiny;
 
+var injectInternals = require('react-dom/lib/ReactFiberDevToolsHook').injectInternals;
+
+if (typeof injectInternals === 'function') {
+ injectInternals({
+ findFiberByHostInstance: () => null,// ReactHardwareComponentTree.getClosestInstanceFromNode,
+ findHostInstanceByFiber: TinyRenderer.findHostInstance
+ });
+}
